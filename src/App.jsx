@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import './style/style.css';
-import { Button, Textarea, Label, TextInput, Modal } from 'flowbite-react';
+import { Textarea, Label, TextInput } from 'flowbite-react';
+import { Dialog } from 'primereact/dialog';
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
 
 function App() {
   const [curhatans, setCurhatans] = useState([])
-  const [openModal, setOpenModal] = useState(false)
   const [isCreated, setIsCreated] = useState(false)
+  const [visible, setVisible] = useState(false);
   const [author, setAuthor] = useState('')
   const [curhatan, setCurhatan] = useState('')
-  const props = { openModal, setOpenModal };
   const DOMAIN = "https://go-fly-production.up.railway.app"
 
   const getAllCurhatan = () => {
@@ -19,17 +21,21 @@ function App() {
       .then(data => {
         if (data.meta.status === 200) {
           setCurhatans(data.data)
+          setVisible(false)
           setIsCreated(false)
+          setAuthor('')
+          setCurhatan('')
         }
       })
   }
+
 
   const postCurhatan = (e) => {
     e.preventDefault()
 
     const payload = {
       author: author,
-      note : curhatan,
+      note: curhatan,
     }
 
     fetch(DOMAIN + '/note/create', {
@@ -40,7 +46,7 @@ function App() {
       .then(data => {
         if (data.meta.status === 200) {
           setIsCreated(true)
-          setOpenModal(false)
+          setVisible(false)
         }
       })
   }
@@ -76,58 +82,48 @@ function App() {
       </div>
 
       <div className="button-add-note fixed bottom-5 right-5 md:right-24 lg:right-80">
-        <button onClick={() => props.setOpenModal('dismissible')} className='rounded-full bg-accent hover:bg-blue-600 p-3' >
+        <button label="Show" icon="pi pi-external-link" onClick={() => setVisible(true)} className='rounded-full bg-accent hover:bg-blue-600 p-3' >
           <div className="icon text-2xl font-extrabold text-white flex">
             <ion-icon name="add-outline"></ion-icon>
           </div>
         </button>
-        <Modal
-          dismissible
-          show={props.openModal === 'dismissible'}
-          onClose={() => props.setOpenModal(undefined)}
-          className='h-screen'
-        >
-          <Modal.Header>Curhatan-ku</Modal.Header>
-          <Modal.Body>
-            <div className="space-y-6">
-              <form className="flex flex-col gap-6" onSubmit={postCurhatan}>
-                <div>
-                  <div className="mb-2 block">
-                    <Label
-                      htmlFor="nama"
-                      value="Nama Kamu"
-                    />
-                  </div>
-                  <TextInput
-                    id="nama"
-                    placeholder="namaku rahasia"
-                    type="text"
-                    helperText={'tidak wajib'}
-                    onChange={(e) => setAuthor(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <div className="mb-2 block">
-                    <Label
-                      htmlFor="curatan"
-                      value="Curhatan"
-                    />
-                  </div>
-                  <Textarea
-                    id="curatan"
-                    placeholder='saya hari ini....'
-                    required
-                    rows={5}
-                    onChange={(e)=> setCurhatan(e.target.value)}
-                  />
-                </div>
-                <button type="submit" className='bg-accent hover:bg-blue-600 text-white p-2 py-3 rounded-lg font-semibold'>
-                  Kirim
-                </button>
-              </form>
+        <Dialog header="Curhatan-ku" visible={visible}   onHide={() => setVisible(false)} className='w-3/4 lg:w-1/2'>
+          <form className="flex flex-col gap-6" onSubmit={postCurhatan}>
+            <div>
+              <div className="mb-2 block">
+                <Label
+                  htmlFor="nama"
+                  value="Nama Kamu"
+                />
+              </div>
+              <TextInput
+                id="nama"
+                placeholder="namaku rahasia"
+                type="text"
+                helperText={'tidak wajib'}
+                onChange={(e) => setAuthor(e.target.value)}
+              />
             </div>
-          </Modal.Body>
-        </Modal>
+            <div>
+              <div className="mb-2 block">
+                <Label
+                  htmlFor="curatan"
+                  value="Curhatan"
+                />
+              </div>
+              <Textarea
+                id="curatan"
+                placeholder='saya hari ini....'
+                required
+                rows={5}
+                onChange={(e)=> setCurhatan(e.target.value)}
+              />
+            </div>
+            <button type="submit" className='bg-accent hover:bg-blue-600 text-white p-2 py-3 rounded-lg font-semibold'>
+              Kirim
+            </button>
+          </form>
+        </Dialog>
       </div>
     </>
   );
